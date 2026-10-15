@@ -1,11 +1,10 @@
 name: Deploy admin
 
-# NOTE: this workflow targets the "admin-panel" branch's plain (repo-root)
-# file layout. Do not commit this file while any other branch (e.g.
-# deploy-prep, with its different nested layout) is checked out — committing
-# it elsewhere will attach it to the wrong branch. As of this file being
-# written, the local checkout is deploy-prep; this file has not been
-# committed anywhere yet.
+# NOTE: "admin-panel" now uses a monorepo layout — the Next.js admin app's
+# package.json/package-lock.json live under admin/, with backend/ alongside
+# it at the repo root (not a plain repo-root app layout). Both the test job
+# and the deploy job's remote script must operate inside the admin/
+# subdirectory, not the checkout/clone root.
 
 on:
   push:
@@ -18,6 +17,11 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        # package.json / package-lock.json live under admin/ in this
+        # monorepo, not at the checkout root.
+        working-directory: admin
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -93,15 +97,25 @@ jobs:
             git -C "$NEW_REL" fetch --depth 1 origin "$DEPLOY_SHA"
             git -C "$NEW_REL" checkout -q FETCH_HEAD
 
-            ln -s "$ROOT/${APP}-shared/.env" "$NEW_REL/.env"
+            # $NEW_REL is the clone of the whole monorepo (admin/ + backend/
+            # at its root) — the actual Next.js app, its package.json, and
+            # what PM2's cwd must eventually point at lives in its admin/
+            # subdirectory, not at $NEW_REL itself.
+            APP_DIR="$NEW_REL/admin"
+            if [ ! -f "$APP_DIR/package.json" ]; then
+              echo "ABORT: $APP_DIR/package.json not found after checkout — monorepo layout assumption is wrong or the clone is incomplete."
+              exit 1
+            fi
 
-            cd "$NEW_REL"
+            ln -s "$ROOT/${APP}-shared/.env" "$APP_DIR/.env"
+
+            cd "$APP_DIR"
             npm ci
             npm run build
 
-            echo "Switching live release: $PREV_REL -> $NEW_REL"
+            echo "Switching live release: $PREV_REL -> $APP_DIR"
             set +e
-            ln -sfn "$NEW_REL" "$ROOT/${APP}_tmp" && mv -Tf "$ROOT/${APP}_tmp" "$ROOT/$APP"
+            ln -sfn "$APP_DIR" "$ROOT/${APP}_tmp" && mv -Tf "$ROOT/${APP}_tmp" "$ROOT/$APP"
             SWITCH_STATUS=$?
             set -e
 
