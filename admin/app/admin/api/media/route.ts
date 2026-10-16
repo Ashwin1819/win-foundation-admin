@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { backendAdminFetch } from "@/lib/backendApi";
 import { verifyAdmin, getAdminTokenFromRequest } from "@/lib/verifyAdmin";
 
-// The backend serves uploaded files from its own origin (e.g. localhost:3000),
-// not this admin app's — Media.url comes back as a backend-relative path
-// ("/uploads/media-xxx.jpg"), so it needs the backend's origin prefixed before
-// the browser can load it.
-const BACKEND_ORIGIN = (process.env.BACKEND_API_URL || "http://localhost:3000/api").replace(/\/api\/?$/, "");
+// Media.url comes back from the backend as a root-relative path
+// ("/uploads/media-xxx.jpg"). Nginx proxies /uploads/ on the public domain
+// straight through to the backend, so this relative path is already
+// browser-reachable as-is — no origin needs to be prefixed (prefixing with
+// BACKEND_API_URL's origin, e.g. http://localhost:3000, previously produced a
+// URL that only ever resolved on the server itself, never in a real browser).
 
 type BackendMedia = {
   id: number;
@@ -20,7 +21,7 @@ type BackendMedia = {
 function toMediaItem(item: BackendMedia) {
   return {
     id: String(item.id),
-    imageUrl: item.url ? `${BACKEND_ORIGIN}${item.url}` : "",
+    imageUrl: item.url || "",
     title: item.title,
     caption: item.caption,
     createdAt: item.createdAt,

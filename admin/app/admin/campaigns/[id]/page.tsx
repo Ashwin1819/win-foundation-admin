@@ -793,6 +793,11 @@ export default function CampaignEditPage() {
         return;
       }
 
+      if (!product.id && !product.image?.trim()) {
+        setMessage(`Product ${index + 1}: an image is required for a new product.`);
+        return;
+      }
+
       if (Number(product.availableQty) <= 0) {
         setMessage(
           `Product ${index + 1}: Required quantity must be greater than 0.`
@@ -857,7 +862,11 @@ export default function CampaignEditPage() {
             name: product.name.trim(),
             availableQty: Number(product.availableQty),
             pricePerUnit: Number(product.pricePerUnit),
-            image: product.image?.trim() || null,
+            // Only send image when it actually has a value — an existing
+            // product being saved without a new upload must keep its current
+            // image untouched, not have it overwritten with null (which the
+            // backend's schema rejects outright, since it expects a string).
+            ...(product.image?.trim() ? { image: product.image.trim() } : {}),
             order: index,
             isActive: product.isActive,
           }),
