@@ -599,44 +599,96 @@ export default function CampaignEditPage() {
     setNewUpdateImageUrl("");
   }
 
-  function handleFiles(
+  // Uploads each selected file through the shared upload endpoint and
+  // returns the real, server-reachable URLs — these pickers previously only
+  // ever produced a local preview (a FileReader data URL or filename), with
+  // nothing anywhere that actually sent the file bytes to the server, so a
+  // picture chosen here could never end up saved no matter what was clicked
+  // afterward.
+  async function uploadFiles(files: File[]): Promise<string[]> {
+    const uploaded: string[] = [];
+
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) continue;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/admin/api/uploads/campaign-product", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.imageUrl) {
+        uploaded.push(data.imageUrl);
+      } else {
+        throw new Error(data?.error || `Failed to upload ${file.name}.`);
+      }
+    }
+
+    return uploaded;
+  }
+
+  async function handleFiles(
     files: FileList | null,
     type: "products" | "project" | "updates"
   ) {
     if (!files) return;
 
-    const names = Array.from(files).map((file) => file.name);
+    const fileArray = Array.from(files);
+    const names = fileArray.map((file) => file.name);
 
     if (type === "products") {
       setSelectedFiles(names);
+      setCampaignImagePreviews([]);
 
-      const readers = Array.from(files).map(
-        (file) =>
-          new Promise<string>((resolve) => {
-            if (!file.type.startsWith("image/")) {
-              resolve("");
-              return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = () =>
-              resolve(typeof reader.result === "string" ? reader.result : "");
-            reader.onerror = () => resolve("");
-            reader.readAsDataURL(file);
-          })
-      );
-
-      void Promise.all(readers).then((previews) => {
-        setCampaignImagePreviews(previews.filter(Boolean));
-      });
+      try {
+        const uploaded = await uploadFiles(fileArray);
+        setImageUrls((current) => [...current, ...uploaded]);
+      } catch (error) {
+        console.error("Campaign image upload error:", error);
+        setMessage(
+          error instanceof Error ? error.message : "Failed to upload image(s)."
+        );
+      } finally {
+        setSelectedFiles([]);
+      }
     }
 
     if (type === "project") {
       setSelectedProjectFile(names[0] || "");
+
+      try {
+        const uploaded = await uploadFiles(fileArray);
+        if (uploaded[0]) {
+          setProjectImageUrls((current) => [...current, uploaded[0]]);
+        }
+      } catch (error) {
+        console.error("Project image upload error:", error);
+        setMessage(
+          error instanceof Error ? error.message : "Failed to upload image."
+        );
+      } finally {
+        setSelectedProjectFile("");
+      }
     }
 
     if (type === "updates") {
       setSelectedUpdateFiles(names);
+
+      try {
+        const uploaded = await uploadFiles(fileArray);
+        setUpdateImageUrls((current) => [...current, ...uploaded]);
+      } catch (error) {
+        console.error("Update image upload error:", error);
+        setMessage(
+          error instanceof Error ? error.message : "Failed to upload image(s)."
+        );
+      } finally {
+        setSelectedUpdateFiles([]);
+      }
     }
   }
 
