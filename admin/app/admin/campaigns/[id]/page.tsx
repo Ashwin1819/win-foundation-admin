@@ -171,6 +171,15 @@ export default function CampaignEditPage() {
       setActiveCampaign(found.isActive);
       setStoryText(found.story || "");
       setCostBreakdown(Array.isArray(found.costBreakdown) ? found.costBreakdown : []);
+      // "Images (multiple)" below must reflect what's actually saved — index 0
+      // is the cover image, the rest are the public gallery — otherwise
+      // reopening an existing campaign shows an empty picker despite images
+      // already existing server-side.
+      setImageUrls(
+        [found.coverImage, ...(found.photos || []).map((p: CampaignPhotoItem) => p.image)].filter(
+          (url): url is string => Boolean(url)
+        )
+      );
     } catch (error) {
       console.error("Load campaign error:", error);
       setMessage(
@@ -923,6 +932,43 @@ export default function CampaignEditPage() {
         }
       }
 
+      // Sync the gallery to match imageUrls.slice(1) (index 0 is the cover
+      // image, handled above). These only ever existed as local preview
+      // state before — nothing created actual CampaignPhoto records for
+      // anything past the first image, so the public gallery stayed empty
+      // no matter how many pictures were added here. Simplest correct sync:
+      // replace the full set rather than diff it, since these entries carry
+      // no stable id to diff against.
+      for (const photo of campaign?.photos || []) {
+        await fetch("/admin/api/campaigns/photos", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ id: photo.id }),
+        });
+      }
+
+      const galleryUrls = imageUrls.slice(1);
+      for (let index = 0; index < galleryUrls.length; index++) {
+        const response = await fetch("/admin/api/campaigns/photos-url", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ campaignId, image: galleryUrls[index], order: index }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data?.error || `Failed to save gallery photo ${index + 1}.`);
+        }
+      }
+
+      await loadCampaign();
       await loadProducts();
       setMessage("Campaign and products saved successfully.");
     } catch (error) {
