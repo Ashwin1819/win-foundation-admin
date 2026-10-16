@@ -71,7 +71,7 @@ export default function FooterLinksPage() {
   const fetchLinks = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/footer-links", { cache: "no-store" });
+      const response = await fetch("/admin/api/footer-links", { cache: "no-store" });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Failed to fetch footer links");
       setLinks(Array.isArray(data) ? data : []);
@@ -84,7 +84,7 @@ export default function FooterLinksPage() {
 
   const fetchSiteSettings = useCallback(async () => {
     try {
-      const response = await fetch("/api/site-settings", { cache: "no-store" });
+      const response = await fetch("/admin/api/site-settings", { cache: "no-store" });
       const data = await response.json();
       if (response.ok) {
         setLogo(data?.logo || "");
@@ -110,7 +110,7 @@ export default function FooterLinksPage() {
 
   const fetchAppearance = useCallback(async () => {
     try {
-      const response = await fetch("/api/homepage-content", { cache: "no-store" });
+      const response = await fetch("/admin/api/homepage-content", { cache: "no-store" });
       const data = await response.json();
       if (response.ok && data?.footerBgColor) {
         setFooterBgColor(data.footerBgColor);
@@ -124,7 +124,7 @@ export default function FooterLinksPage() {
 
   const fetchPolicies = useCallback(async () => {
     try {
-      const response = await fetch("/api/policies", { cache: "no-store" });
+      const response = await fetch("/admin/api/policies", { cache: "no-store" });
       const data = await response.json();
       if (response.ok) {
         setPolicies({ PRIVACY: data?.PRIVACY || "", TERMS: data?.TERMS || "" });
@@ -147,8 +147,8 @@ export default function FooterLinksPage() {
   // Tagline/Contact/Social cards so each can save independently without
   // clobbering the others or the fields the existing Site Settings page owns.
   async function patchSiteSettings(patch: Record<string, string>) {
-    const current = await fetch("/api/site-settings", { cache: "no-store" }).then((r) => r.json());
-    const response = await fetch("/api/site-settings", {
+    const current = await fetch("/admin/api/site-settings", { cache: "no-store" }).then((r) => r.json());
+    const response = await fetch("/admin/api/site-settings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...current, ...patch }),
@@ -173,7 +173,7 @@ export default function FooterLinksPage() {
       const formData = new FormData();
       formData.append("files", file);
 
-      const response = await fetch("/api/media", { method: "POST", body: formData });
+      const response = await fetch("/admin/api/media", { method: "POST", body: formData });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Failed to upload logo");
 
@@ -205,7 +205,7 @@ export default function FooterLinksPage() {
   async function saveAppearance() {
     try {
       setAppearanceSaving(true);
-      const response = await fetch("/api/homepage-content", {
+      const response = await fetch("/admin/api/homepage-content", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ footerBgColor }),
@@ -250,7 +250,7 @@ export default function FooterLinksPage() {
   async function savePolicy(type: "PRIVACY" | "TERMS") {
     try {
       setPolicySaving(type);
-      const response = await fetch("/api/policies", {
+      const response = await fetch("/admin/api/policies", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type, content: policies[type] }),
@@ -334,7 +334,7 @@ export default function FooterLinksPage() {
       const method = editingLink ? "PUT" : "POST";
       const body = editingLink ? { id: editingLink.id, ...formData } : formData;
 
-      const response = await fetch("/api/footer-links", {
+      const response = await fetch("/admin/api/footer-links", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -368,7 +368,7 @@ export default function FooterLinksPage() {
 
     try {
       setDeletingId(id);
-      const response = await fetch("/api/footer-links", {
+      const response = await fetch("/admin/api/footer-links", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
@@ -392,7 +392,7 @@ export default function FooterLinksPage() {
 
   async function toggleActive(link: FooterLink) {
     try {
-      const response = await fetch("/api/footer-links", {
+      const response = await fetch("/admin/api/footer-links", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: link.id, isActive: !link.isActive }),
@@ -412,8 +412,8 @@ export default function FooterLinksPage() {
   async function saveTagline() {
     try {
       setTaglineSaving(true);
-      const current = await fetch("/api/site-settings", { cache: "no-store" }).then((r) => r.json());
-      const response = await fetch("/api/site-settings", {
+      const current = await fetch("/admin/api/site-settings", { cache: "no-store" }).then((r) => r.json());
+      const response = await fetch("/admin/api/site-settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...current, footerTagline: tagline }),

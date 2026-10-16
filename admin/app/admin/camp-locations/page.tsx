@@ -94,7 +94,7 @@ export default function CampLocationsPage() {
       setLoading(true);
       setError("");
 
-      const response = await fetch("/api/camp-locations", { cache: "no-store" });
+      const response = await fetch("/admin/api/camp-locations", { cache: "no-store" });
       const data = await response.json();
 
       if (!response.ok) {
@@ -111,7 +111,7 @@ export default function CampLocationsPage() {
 
   const fetchInitiatives = useCallback(async () => {
     try {
-      const response = await fetch("/api/camp-locations/initiatives", { cache: "no-store" });
+      const response = await fetch("/admin/api/camp-locations/initiatives", { cache: "no-store" });
       const data = await response.json();
 
       if (response.ok) {
@@ -215,7 +215,7 @@ export default function CampLocationsPage() {
         isActive: form.isActive,
       };
 
-      const response = await fetch("/api/camp-locations", {
+      const response = await fetch("/admin/api/camp-locations", {
         method: editingId ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
@@ -258,7 +258,7 @@ export default function CampLocationsPage() {
 
       const token = "cookie-auth";
 
-      const response = await fetch("/api/camp-locations", {
+      const response = await fetch("/admin/api/camp-locations", {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -311,7 +311,7 @@ export default function CampLocationsPage() {
       formData.append("file", file);
       formData.append("campLocationId", String(editingId));
 
-      const response = await fetch("/api/media", {
+      const response = await fetch("/admin/api/media", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -342,7 +342,7 @@ export default function CampLocationsPage() {
 
       const token = "cookie-auth";
 
-      const response = await fetch("/api/media", {
+      const response = await fetch("/admin/api/media", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

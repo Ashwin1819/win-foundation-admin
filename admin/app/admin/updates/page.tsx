@@ -54,7 +54,7 @@ export default function UpdatesPage() {
     try {
       setLoading(true);
 
-      const response = await fetch("/api/updates");
+      const response = await fetch("/admin/api/updates");
 
       if (!response.ok) {
         throw new Error("Failed to fetch updates");
@@ -199,7 +199,7 @@ export default function UpdatesPage() {
         sortOrder: Number(formData.sortOrder) || 0,
       };
 
-      const response = await fetch("/api/updates", {
+      const response = await fetch("/admin/api/updates", {
         method: editingId ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
@@ -257,7 +257,7 @@ export default function UpdatesPage() {
         sortOrder: update.sortOrder,
       };
 
-      const response = await fetch("/api/updates", {
+      const response = await fetch("/admin/api/updates", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -303,7 +303,7 @@ export default function UpdatesPage() {
       
       const token = "cookie-auth";
 
-      const response = await fetch("/api/updates", {
+      const response = await fetch("/admin/api/updates", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

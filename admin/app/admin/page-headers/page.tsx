@@ -27,7 +27,7 @@ export default function PageHeadersAdmin() {
 
   const fetchContent = useCallback(async () => {
     try {
-      const response = await fetch("/api/homepage-content", { cache: "no-store" });
+      const response = await fetch("/admin/api/homepage-content", { cache: "no-store" });
       const data = await response.json();
       if (response.ok) {
         setForms({
@@ -58,7 +58,7 @@ export default function PageHeadersAdmin() {
           ? { contactHeroEyebrow: form.eyebrow, contactHeroHeading: form.heading, contactHeroSubtext: form.subtext }
           : { [`${key}HeroHeading`]: form.heading, [`${key}HeroSubtext`]: form.subtext };
 
-      const response = await fetch("/api/homepage-content", {
+      const response = await fetch("/admin/api/homepage-content", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(patch),

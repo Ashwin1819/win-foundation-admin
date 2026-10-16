@@ -45,7 +45,7 @@ export default function DonationsPage() {
       try {
         setLoading(true);
 
-        const response = await fetch("/api/donations", {
+        const response = await fetch("/admin/api/donations", {
           method: "GET",
           cache: "no-store",
         });
@@ -153,7 +153,7 @@ export default function DonationsPage() {
       
       const token = "cookie-auth";
 
-      const response = await fetch("/api/donations", {
+      const response = await fetch("/admin/api/donations", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -243,7 +243,7 @@ export default function DonationsPage() {
       
       const token = "cookie-auth";
 
-      const response = await fetch("/api/donations/resend-email", {
+      const response = await fetch("/admin/api/donations/resend-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

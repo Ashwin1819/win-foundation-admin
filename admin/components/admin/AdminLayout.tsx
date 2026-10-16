@@ -148,7 +148,7 @@ export default function AdminLayout({
   async function loadSiteLogo() {
     try {
       const response = await fetch(
-        "/api/site-settings",
+        "/admin/api/site-settings",
         {
           method: "GET",
           cache: "no-store",
@@ -194,7 +194,7 @@ export default function AdminLayout({
 
     async function checkAuth() {
       try {
-        const response = await fetch("/api/auth/me", { cache: "no-store" });
+        const response = await fetch("/admin/api/auth/me", { cache: "no-store" });
 
         if (cancelled) return;
 
@@ -270,7 +270,7 @@ export default function AdminLayout({
 
   async function logout() {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch("/admin/api/auth/logout", { method: "POST" });
 
       router.replace(
         "/admin/login"

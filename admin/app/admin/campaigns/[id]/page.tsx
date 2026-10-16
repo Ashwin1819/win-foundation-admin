@@ -136,7 +136,7 @@ export default function CampaignEditPage() {
       setLoading(true);
       setMessage("");
 
-      const response = await fetch("/api/campaigns", {
+      const response = await fetch("/admin/api/campaigns", {
         method: "GET",
         cache: "no-store",
       });
@@ -176,7 +176,7 @@ export default function CampaignEditPage() {
       setLoadingProducts(true);
 
       const response = await fetch(
-        `/api/campaign-products?campaignId=${encodeURIComponent(campaignId)}`,
+        `/admin/api/campaign-products?campaignId=${encodeURIComponent(campaignId)}`,
         {
           method: "GET",
           cache: "no-store",
@@ -205,7 +205,7 @@ export default function CampaignEditPage() {
 
     try {
       const response = await fetch(
-        `/api/campaign-project?campaignId=${encodeURIComponent(campaignId)}`,
+        `/admin/api/campaign-project?campaignId=${encodeURIComponent(campaignId)}`,
         {
           method: "GET",
           cache: "no-store",
@@ -269,7 +269,7 @@ export default function CampaignEditPage() {
       setLoadingUpdates(true);
 
       const response = await fetch(
-        `/api/campaign-updates?campaignId=${encodeURIComponent(campaignId)}`,
+        `/admin/api/campaign-updates?campaignId=${encodeURIComponent(campaignId)}`,
         {
           method: "GET",
           cache: "no-store",
@@ -350,7 +350,7 @@ export default function CampaignEditPage() {
       setSavingStory(true);
       setMessage("");
 
-      const response = await fetch("/api/campaigns", {
+      const response = await fetch("/admin/api/campaigns", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -406,7 +406,7 @@ export default function CampaignEditPage() {
       formData.append("file", file);
       formData.append("campaignId", campaignId);
 
-      const response = await fetch("/api/campaigns/photos", {
+      const response = await fetch("/admin/api/campaigns/photos", {
         method: "POST",
         body: formData,
       });
@@ -435,7 +435,7 @@ export default function CampaignEditPage() {
     try {
       setDeletingGalleryPhotoId(photo.id);
 
-      const response = await fetch("/api/campaigns/photos", {
+      const response = await fetch("/admin/api/campaigns/photos", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: photo.id }),
@@ -468,7 +468,7 @@ export default function CampaignEditPage() {
       setAddingGalleryVideo(true);
       setMessage("");
 
-      const response = await fetch("/api/campaigns/videos", {
+      const response = await fetch("/admin/api/campaigns/videos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -505,7 +505,7 @@ export default function CampaignEditPage() {
     try {
       setDeletingGalleryVideoId(video.id);
 
-      const response = await fetch("/api/campaigns/videos", {
+      const response = await fetch("/admin/api/campaigns/videos", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: video.id }),
@@ -684,7 +684,7 @@ export default function CampaignEditPage() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("/api/uploads/campaign-product", {
+      const response = await fetch("/admin/api/uploads/campaign-product", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -740,7 +740,7 @@ export default function CampaignEditPage() {
     if (!token) return;
 
     try {
-      const response = await fetch("/api/campaign-products", {
+      const response = await fetch("/admin/api/campaign-products", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -799,7 +799,7 @@ export default function CampaignEditPage() {
       setSavingProducts(true);
       setMessage("");
 
-      const campaignResponse = await fetch("/api/campaigns", {
+      const campaignResponse = await fetch("/admin/api/campaigns", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -834,7 +834,7 @@ export default function CampaignEditPage() {
       for (let index = 0; index < products.length; index++) {
         const product = products[index];
 
-        const response = await fetch("/api/campaign-products", {
+        const response = await fetch("/admin/api/campaign-products", {
           method: product.id ? "PUT" : "POST",
           headers: {
             "Content-Type": "application/json",
@@ -889,7 +889,7 @@ export default function CampaignEditPage() {
       const token = "cookie-auth";
 
       const existingResponse = await fetch(
-        `/api/campaign-project?campaignId=${encodeURIComponent(campaignId)}`,
+        `/admin/api/campaign-project?campaignId=${encodeURIComponent(campaignId)}`,
         {
           method: "GET",
           cache: "no-store",
@@ -907,7 +907,7 @@ export default function CampaignEditPage() {
         images: projectImageUrls,
       };
 
-      const response = await fetch("/api/campaign-project", {
+      const response = await fetch("/admin/api/campaign-project", {
         method: existingProject?.id ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
@@ -986,7 +986,7 @@ export default function CampaignEditPage() {
 
       const token = "cookie-auth";
 
-      const response = await fetch("/api/campaign-updates", {
+      const response = await fetch("/admin/api/campaign-updates", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

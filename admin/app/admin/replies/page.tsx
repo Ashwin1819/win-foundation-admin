@@ -42,7 +42,7 @@ export default function RepliesPage() {
       setLoading(true);
 
       const response = await fetch(
-        `/api/replies?sort=${sortOrder}`,
+        `/admin/api/replies?sort=${sortOrder}`,
         {
           method: "GET",
           cache: "no-store",
@@ -170,7 +170,7 @@ export default function RepliesPage() {
 
       const token = "cookie-auth";
 
-      const response = await fetch("/api/replies", {
+      const response = await fetch("/admin/api/replies", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

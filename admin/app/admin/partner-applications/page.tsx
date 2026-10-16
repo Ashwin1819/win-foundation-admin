@@ -46,7 +46,7 @@ export default function PartnerApplicationsPage() {
       setLoading(true);
 
       const response = await fetch(
-        "/api/partner-applications",
+        "/admin/api/partner-applications",
         {
           cache: "no-store",
         }
@@ -122,7 +122,7 @@ export default function PartnerApplicationsPage() {
       const token = await getToken();
 
       const response = await fetch(
-        "/api/partner-applications",
+        "/admin/api/partner-applications",
         {
           method: "PUT",
           headers: {
@@ -188,7 +188,7 @@ export default function PartnerApplicationsPage() {
       const token = await getToken();
 
       const response = await fetch(
-        "/api/partner-applications",
+        "/admin/api/partner-applications",
         {
           method: "DELETE",
           headers: {

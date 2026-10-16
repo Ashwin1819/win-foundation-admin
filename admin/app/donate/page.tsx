@@ -45,7 +45,7 @@ export default function DonatePage() {
     async function fetchCampaigns() {
       try {
         const response = await fetch(
-          "/api/campaigns"
+          "/admin/api/campaigns"
         );
 
         const data = await response.json();
@@ -133,7 +133,7 @@ export default function DonatePage() {
       setSubmitting(true);
 
       const response = await fetch(
-        "/api/donations",
+        "/admin/api/donations",
         {
           method: "POST",
           headers: {

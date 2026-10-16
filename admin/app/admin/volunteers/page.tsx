@@ -67,7 +67,7 @@ export default function VolunteersPage() {
       
       const token = "cookie-auth";
 
-      const response = await fetch("/api/volunteers", {
+      const response = await fetch("/admin/api/volunteers", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -109,7 +109,7 @@ export default function VolunteersPage() {
       const token = "cookie-auth";
 
       const response = await fetch(
-        "/api/volunteers",
+        "/admin/api/volunteers",
         {
           method: "PUT",
           headers: {
@@ -180,7 +180,7 @@ export default function VolunteersPage() {
       const token = "cookie-auth";
 
       const response = await fetch(
-        "/api/volunteers",
+        "/admin/api/volunteers",
         {
           method: "DELETE",
           headers: {

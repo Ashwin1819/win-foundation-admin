@@ -64,7 +64,7 @@ export default function TeamMembersPage() {
     try {
       setLoading(true);
 
-      const response = await fetch("/api/team-members", { cache: "no-store" });
+      const response = await fetch("/admin/api/team-members", { cache: "no-store" });
       const data = await response.json();
 
       if (!response.ok) {
@@ -147,7 +147,7 @@ export default function TeamMembersPage() {
       const formData = new FormData();
       formData.append("files", file);
 
-      const response = await fetch("/api/media", {
+      const response = await fetch("/admin/api/media", {
         method: "POST",
         body: formData,
       });
@@ -190,7 +190,7 @@ export default function TeamMembersPage() {
       const method = editingId ? "PUT" : "POST";
       const body = editingId ? { id: editingId, ...form } : form;
 
-      const response = await fetch("/api/team-members", {
+      const response = await fetch("/admin/api/team-members", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -223,7 +223,7 @@ export default function TeamMembersPage() {
     try {
       setDeletingId(id);
 
-      const response = await fetch("/api/team-members", {
+      const response = await fetch("/admin/api/team-members", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),

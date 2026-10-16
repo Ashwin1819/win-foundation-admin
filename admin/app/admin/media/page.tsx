@@ -58,7 +58,7 @@ export default function MediaPage() {
       setLoading(true);
 
       const response = await fetch(
-        `/api/media?sort=${sortOrder}`,
+        `/admin/api/media?sort=${sortOrder}`,
         {
           cache: "no-store",
         }
@@ -137,7 +137,7 @@ export default function MediaPage() {
       });
 
       const response = await fetch(
-        "/api/media",
+        "/admin/api/media",
         {
           method: "POST",
           headers: {
@@ -210,7 +210,7 @@ export default function MediaPage() {
         "cookie-auth";
 
       const response = await fetch(
-        "/api/media",
+        "/admin/api/media",
         {
           method: "PUT",
           headers: {
@@ -280,7 +280,7 @@ export default function MediaPage() {
         "cookie-auth";
 
       const response = await fetch(
-        "/api/media",
+        "/admin/api/media",
         {
           method: "DELETE",
           headers: {

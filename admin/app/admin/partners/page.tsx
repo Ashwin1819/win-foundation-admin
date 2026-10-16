@@ -30,7 +30,7 @@ export default function PartnersPage() {
 
   async function fetchPartners() {
     try {
-      const response = await fetch("/api/partners", { cache: "no-store" });
+      const response = await fetch("/admin/api/partners", { cache: "no-store" });
       const data = await response.json();
 
       setPartners(Array.isArray(data) ? data : []);
@@ -64,7 +64,7 @@ export default function PartnersPage() {
     }
 
     try {
-      const response = await fetch("/api/partners", {
+      const response = await fetch("/admin/api/partners", {
         method: editingId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -119,7 +119,7 @@ export default function PartnersPage() {
     if (!confirmed) return;
 
     try {
-      const response = await fetch("/api/partners", {
+      const response = await fetch("/admin/api/partners", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),

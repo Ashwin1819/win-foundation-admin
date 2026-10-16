@@ -62,7 +62,7 @@ export default function AboutPageAdmin() {
 
   const fetchContent = useCallback(async () => {
     try {
-      const response = await fetch("/api/homepage-content", { cache: "no-store" });
+      const response = await fetch("/admin/api/homepage-content", { cache: "no-store" });
       const data = await response.json();
       if (response.ok) {
         setHero({
@@ -101,7 +101,7 @@ export default function AboutPageAdmin() {
   const fetchValues = useCallback(async () => {
     try {
       setValuesLoading(true);
-      const response = await fetch("/api/core-values", { cache: "no-store" });
+      const response = await fetch("/admin/api/core-values", { cache: "no-store" });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Failed to fetch core values");
       setValues(Array.isArray(data) ? [...data].sort((a, b) => a.order - b.order) : []);
@@ -120,7 +120,7 @@ export default function AboutPageAdmin() {
   async function savePatch(patch: Record<string, string>, label: string, setSaving: (v: boolean) => void) {
     try {
       setSaving(true);
-      const response = await fetch("/api/homepage-content", {
+      const response = await fetch("/admin/api/homepage-content", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(patch),
@@ -188,7 +188,7 @@ export default function AboutPageAdmin() {
       const method = editingValue ? "PUT" : "POST";
       const body = editingValue ? { id: editingValue.id, ...valueForm } : valueForm;
 
-      const response = await fetch("/api/core-values", {
+      const response = await fetch("/admin/api/core-values", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -222,7 +222,7 @@ export default function AboutPageAdmin() {
 
     try {
       setDeletingValueId(id);
-      const response = await fetch("/api/core-values", {
+      const response = await fetch("/admin/api/core-values", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
@@ -246,7 +246,7 @@ export default function AboutPageAdmin() {
 
   async function toggleValueActive(value: CoreValue) {
     try {
-      const response = await fetch("/api/core-values", {
+      const response = await fetch("/admin/api/core-values", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: value.id, isActive: !value.isActive }),

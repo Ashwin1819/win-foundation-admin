@@ -34,7 +34,7 @@ export default function HeroSlidesPage() {
 
   async function fetchSlides() {
     try {
-      const response = await fetch("/api/hero-slides", { cache: "no-store" });
+      const response = await fetch("/admin/api/hero-slides", { cache: "no-store" });
       const data = await response.json();
 
       setSlides(Array.isArray(data) ? data : []);
@@ -70,7 +70,7 @@ export default function HeroSlidesPage() {
     }
 
     try {
-      const response = await fetch("/api/hero-slides", {
+      const response = await fetch("/admin/api/hero-slides", {
         method: editingId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -127,7 +127,7 @@ export default function HeroSlidesPage() {
     if (!confirmed) return;
 
     try {
-      const response = await fetch("/api/hero-slides", {
+      const response = await fetch("/admin/api/hero-slides", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),

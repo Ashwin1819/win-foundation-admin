@@ -87,7 +87,7 @@ export default function SiteSettingsPage() {
 
         const response =
           await fetch(
-            "/api/site-settings",
+            "/admin/api/site-settings",
             {
               method: "GET",
               headers: {
@@ -274,7 +274,7 @@ export default function SiteSettingsPage() {
 
       const response =
         await fetch(
-          "/api/site-settings",
+          "/admin/api/site-settings",
           {
             method: "POST",
 

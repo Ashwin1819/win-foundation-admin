@@ -90,7 +90,7 @@ export default function FormFieldsPage() {
   const fetchFields = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/form-fields", { cache: "no-store" });
+      const response = await fetch("/admin/api/form-fields", { cache: "no-store" });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Failed to fetch form fields");
       setFields(Array.isArray(data) ? data : []);
@@ -170,7 +170,7 @@ export default function FormFieldsPage() {
         isActive: formData.isActive,
       };
 
-      const response = await fetch("/api/form-fields", {
+      const response = await fetch("/admin/api/form-fields", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -204,7 +204,7 @@ export default function FormFieldsPage() {
 
     try {
       setDeletingId(field.id);
-      const response = await fetch("/api/form-fields", {
+      const response = await fetch("/admin/api/form-fields", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: field.id }),
@@ -228,7 +228,7 @@ export default function FormFieldsPage() {
 
   async function toggleActive(field: FormField) {
     try {
-      const response = await fetch("/api/form-fields", {
+      const response = await fetch("/admin/api/form-fields", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: field.id, isActive: !field.isActive }),

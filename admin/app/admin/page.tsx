@@ -34,17 +34,17 @@ export default function AdminDashboard() {
             messagesRes,
             volunteersRes,
           ] = await Promise.all([
-            fetch("/api/donations"),
+            fetch("/admin/api/donations"),
 
-            fetch("/api/campaigns"),
+            fetch("/admin/api/campaigns"),
 
-            fetch("/api/testimonials"),
+            fetch("/admin/api/testimonials"),
 
-            fetch("/api/updates"),
+            fetch("/admin/api/updates"),
 
-            fetch("/api/messages"),
+            fetch("/admin/api/messages"),
 
-            fetch("/api/volunteers"),
+            fetch("/admin/api/volunteers"),
           ]);
 
           const donationsData = donationsRes.ok

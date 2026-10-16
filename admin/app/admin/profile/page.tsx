@@ -20,7 +20,7 @@ export default function ProfilePage() {
 
     async function load() {
       try {
-        const response = await fetch("/api/auth/me", { cache: "no-store" });
+        const response = await fetch("/admin/api/auth/me", { cache: "no-store" });
 
         if (cancelled) return;
 

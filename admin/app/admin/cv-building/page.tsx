@@ -85,7 +85,7 @@ export default function CVBuildingPage() {
       const token = "cookie-auth";
 
       const response = await fetch(
-        "/api/cv-requests",
+        "/admin/api/cv-requests",
         {
           method: "GET",
           headers: {
@@ -257,7 +257,7 @@ export default function CVBuildingPage() {
         "cookie-auth";
 
       const response = await fetch(
-        "/api/cv-requests",
+        "/admin/api/cv-requests",
         {
           method: "PUT",
           headers: {
@@ -334,7 +334,7 @@ export default function CVBuildingPage() {
         "cookie-auth";
 
       const response = await fetch(
-        "/api/cv-requests",
+        "/admin/api/cv-requests",
         {
           method: "DELETE",
           headers: {

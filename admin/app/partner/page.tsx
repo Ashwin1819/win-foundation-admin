@@ -47,7 +47,7 @@ export default function PartnerPage() {
     setError("");
 
     try {
-      const response = await fetch("/api/partner-applications", {
+      const response = await fetch("/admin/api/partner-applications", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

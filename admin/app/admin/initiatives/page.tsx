@@ -100,7 +100,7 @@ export default function InitiativesPage() {
     try {
       setLoading(true);
 
-      const response = await fetch("/api/initiatives", { cache: "no-store" });
+      const response = await fetch("/admin/api/initiatives", { cache: "no-store" });
       const data = await response.json();
 
       if (!response.ok) {
@@ -196,7 +196,7 @@ export default function InitiativesPage() {
         isActive: form.isActive,
       };
 
-      const response = await fetch("/api/initiatives", {
+      const response = await fetch("/admin/api/initiatives", {
         method: editingId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editingId ? { id: editingId, ...payload } : payload),
@@ -232,7 +232,7 @@ export default function InitiativesPage() {
     try {
       setDeletingId(initiative.id);
 
-      const response = await fetch("/api/initiatives", {
+      const response = await fetch("/admin/api/initiatives", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: initiative.id }),
@@ -269,7 +269,7 @@ export default function InitiativesPage() {
       formData.append("file", file);
       formData.append("initiativeId", String(editingId));
 
-      const response = await fetch("/api/initiatives/photos", {
+      const response = await fetch("/admin/api/initiatives/photos", {
         method: "POST",
         body: formData,
       });
@@ -308,7 +308,7 @@ export default function InitiativesPage() {
       const formData = new FormData();
       formData.append("files", file);
 
-      const response = await fetch("/api/media", {
+      const response = await fetch("/admin/api/media", {
         method: "POST",
         body: formData,
       });
@@ -339,7 +339,7 @@ export default function InitiativesPage() {
       setAddingVideo(true);
       setMessage("");
 
-      const response = await fetch("/api/initiatives/videos", {
+      const response = await fetch("/admin/api/initiatives/videos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -374,7 +374,7 @@ export default function InitiativesPage() {
     try {
       setDeletingVideoId(video.id);
 
-      const response = await fetch("/api/initiatives/videos", {
+      const response = await fetch("/admin/api/initiatives/videos", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: video.id }),
@@ -402,7 +402,7 @@ export default function InitiativesPage() {
     try {
       setDeletingPhotoId(photo.id);
 
-      const response = await fetch("/api/initiatives/photos", {
+      const response = await fetch("/admin/api/initiatives/photos", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: photo.id }),

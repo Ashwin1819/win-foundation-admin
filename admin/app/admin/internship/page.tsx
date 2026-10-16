@@ -49,7 +49,7 @@ export default function InternshipPage() {
       setLoading(true);
 
       const response = await fetch(
-        "/api/internship-applications",
+        "/admin/api/internship-applications",
         {
           cache: "no-store",
         }
@@ -113,7 +113,7 @@ export default function InternshipPage() {
       const token = await getToken();
 
       const response = await fetch(
-        "/api/internship-applications",
+        "/admin/api/internship-applications",
         {
           method: "PUT",
           headers: {
@@ -178,7 +178,7 @@ export default function InternshipPage() {
       const token = await getToken();
 
       const response = await fetch(
-        "/api/internship-applications",
+        "/admin/api/internship-applications",
         {
           method: "DELETE",
           headers: {

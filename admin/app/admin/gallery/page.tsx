@@ -75,7 +75,7 @@ export default function GalleryPage() {
   const fetchAlbums = useCallback(async () => {
     try {
       setLoadingAlbums(true);
-      const response = await fetch("/api/gallery/albums", { cache: "no-store" });
+      const response = await fetch("/admin/api/gallery/albums", { cache: "no-store" });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Failed to fetch albums");
       setAlbums(Array.isArray(data) ? data : []);
@@ -89,7 +89,7 @@ export default function GalleryPage() {
   const fetchVideos = useCallback(async () => {
     try {
       setLoadingVideos(true);
-      const response = await fetch("/api/gallery/videos", { cache: "no-store" });
+      const response = await fetch("/admin/api/gallery/videos", { cache: "no-store" });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Failed to fetch videos");
       setVideos(Array.isArray(data) ? data : []);
@@ -155,7 +155,7 @@ export default function GalleryPage() {
         isActive: albumForm.isActive,
       };
 
-      const response = await fetch("/api/gallery/albums", {
+      const response = await fetch("/admin/api/gallery/albums", {
         method: editingAlbumId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editingAlbumId ? { id: editingAlbumId, ...payload } : payload),
@@ -184,7 +184,7 @@ export default function GalleryPage() {
 
     try {
       setDeletingAlbumId(album.id);
-      const response = await fetch("/api/gallery/albums", {
+      const response = await fetch("/admin/api/gallery/albums", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: album.id }),
@@ -216,7 +216,7 @@ export default function GalleryPage() {
       formData.append("file", file);
       formData.append("albumId", String(editingAlbumId));
 
-      const response = await fetch("/api/gallery/albums/photos", { method: "POST", body: formData });
+      const response = await fetch("/admin/api/gallery/albums/photos", { method: "POST", body: formData });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Failed to upload photo");
 
@@ -234,7 +234,7 @@ export default function GalleryPage() {
 
     try {
       setDeletingPhotoId(photo.id);
-      const response = await fetch("/api/gallery/albums/photos", {
+      const response = await fetch("/admin/api/gallery/albums/photos", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: photo.id }),
@@ -298,7 +298,7 @@ export default function GalleryPage() {
         isActive: videoForm.isActive,
       };
 
-      const response = await fetch("/api/gallery/videos", {
+      const response = await fetch("/admin/api/gallery/videos", {
         method: editingVideoId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editingVideoId ? { id: editingVideoId, ...payload } : payload),
@@ -323,7 +323,7 @@ export default function GalleryPage() {
 
     try {
       setDeletingVideoId(video.id);
-      const response = await fetch("/api/gallery/videos", {
+      const response = await fetch("/admin/api/gallery/videos", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: video.id }),

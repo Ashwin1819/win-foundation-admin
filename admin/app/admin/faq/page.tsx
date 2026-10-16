@@ -66,7 +66,7 @@ export default function FAQPage() {
       setLoading(true);
 
       const response = await fetch(
-        "/api/faq",
+        "/admin/api/faq",
         {
           method: "GET",
           cache: "no-store",
@@ -266,7 +266,7 @@ export default function FAQPage() {
         : formData;
 
       const response = await fetch(
-        "/api/faq",
+        "/admin/api/faq",
         {
           method,
           headers: {
@@ -340,7 +340,7 @@ export default function FAQPage() {
         "cookie-auth";
 
       const response = await fetch(
-        "/api/faq",
+        "/admin/api/faq",
         {
           method: "DELETE",
           headers: {
@@ -396,7 +396,7 @@ export default function FAQPage() {
         "cookie-auth";
 
       const response = await fetch(
-        "/api/faq",
+        "/admin/api/faq",
         {
           method: "PUT",
           headers: {

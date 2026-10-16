@@ -59,7 +59,7 @@ export default function TestimonialsPage() {
     try {
       setLoading(true);
 
-      const response = await fetch("/api/testimonials", {
+      const response = await fetch("/admin/api/testimonials", {
         method: "GET",
         cache: "no-store",
       });
@@ -209,7 +209,7 @@ export default function TestimonialsPage() {
 
       const token = await getToken();
 
-      const response = await fetch("/api/testimonials", {
+      const response = await fetch("/admin/api/testimonials", {
         method: editingId ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
@@ -257,7 +257,7 @@ export default function TestimonialsPage() {
 
       const token = await getToken();
 
-      const response = await fetch("/api/testimonials", {
+      const response = await fetch("/admin/api/testimonials", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

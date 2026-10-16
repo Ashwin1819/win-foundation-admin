@@ -28,7 +28,7 @@ export default function ImpactCountersPage() {
 
   async function fetchCounters() {
     try {
-      const response = await fetch("/api/impact-counters", { cache: "no-store" });
+      const response = await fetch("/admin/api/impact-counters", { cache: "no-store" });
       const data = await response.json();
 
       setCounters(Array.isArray(data) ? data : []);
@@ -59,7 +59,7 @@ export default function ImpactCountersPage() {
     }
 
     try {
-      const response = await fetch("/api/impact-counters", {
+      const response = await fetch("/admin/api/impact-counters", {
         method: editingId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -113,7 +113,7 @@ export default function ImpactCountersPage() {
     if (!confirmed) return;
 
     try {
-      const response = await fetch("/api/impact-counters", {
+      const response = await fetch("/admin/api/impact-counters", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),

@@ -174,7 +174,7 @@ export default function HomeSettingsPage() {
 
   const fetchHeroSlides = useCallback(async () => {
     try {
-      const response = await fetch("/api/hero-slides", {
+      const response = await fetch("/admin/api/hero-slides", {
         method: "GET",
         cache: "no-store",
       });
@@ -200,7 +200,7 @@ export default function HomeSettingsPage() {
 
   const fetchQuotes = useCallback(async () => {
     try {
-      const response = await fetch("/api/quotes", {
+      const response = await fetch("/admin/api/quotes", {
         method: "GET",
         cache: "no-store",
       });
@@ -224,7 +224,7 @@ export default function HomeSettingsPage() {
 
   const fetchHomepageContent = useCallback(async () => {
     try {
-      const response = await fetch("/api/homepage-content", { cache: "no-store" });
+      const response = await fetch("/admin/api/homepage-content", { cache: "no-store" });
       const data = await response.json();
 
       if (response.ok) {
@@ -268,7 +268,7 @@ export default function HomeSettingsPage() {
   async function saveGetInvolved() {
     try {
       setGiSaving(true);
-      const response = await fetch("/api/homepage-content", {
+      const response = await fetch("/admin/api/homepage-content", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(giForm),
@@ -287,7 +287,7 @@ export default function HomeSettingsPage() {
   async function saveMission() {
     try {
       setMissionSaving(true);
-      const response = await fetch("/api/homepage-content", {
+      const response = await fetch("/admin/api/homepage-content", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(missionForm),
@@ -306,7 +306,7 @@ export default function HomeSettingsPage() {
   async function savePresenceSection() {
     try {
       setPresenceSaving(true);
-      const response = await fetch("/api/homepage-content", {
+      const response = await fetch("/admin/api/homepage-content", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(presenceForm),
@@ -337,7 +337,7 @@ export default function HomeSettingsPage() {
       const formData = new FormData();
       formData.append("files", file);
 
-      const response = await fetch("/api/media", {
+      const response = await fetch("/admin/api/media", {
         method: "POST",
         body: formData,
       });
@@ -362,7 +362,7 @@ export default function HomeSettingsPage() {
 
   const fetchPresenceLocations = useCallback(async () => {
     try {
-      const response = await fetch("/api/presence-locations", { cache: "no-store" });
+      const response = await fetch("/admin/api/presence-locations", { cache: "no-store" });
       const data = await response.json();
 
       if (!response.ok) {
@@ -421,7 +421,7 @@ export default function HomeSettingsPage() {
     try {
       setSavingPresenceLocation(true);
 
-      const response = await fetch("/api/presence-locations", {
+      const response = await fetch("/admin/api/presence-locations", {
         method: editingPresenceLocation ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -463,7 +463,7 @@ export default function HomeSettingsPage() {
     try {
       setDeletingPresenceLocationId(location.id);
 
-      const response = await fetch("/api/presence-locations", {
+      const response = await fetch("/admin/api/presence-locations", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: location.id }),
@@ -486,7 +486,7 @@ export default function HomeSettingsPage() {
 
   async function togglePresenceLocationStatus(location: PresenceLocation) {
     try {
-      const response = await fetch("/api/presence-locations", {
+      const response = await fetch("/admin/api/presence-locations", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: location.id, isActive: !location.isActive }),
@@ -618,7 +618,7 @@ export default function HomeSettingsPage() {
 
       const token = "cookie-auth";
 
-      const response = await fetch("/api/hero-slides", {
+      const response = await fetch("/admin/api/hero-slides", {
         method: editingHero ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
@@ -696,7 +696,7 @@ export default function HomeSettingsPage() {
       const token = "cookie-auth";
 
       const response = await fetch(
-        "/api/hero-slides",
+        "/admin/api/hero-slides",
         {
           method: "DELETE",
           headers: {
@@ -748,7 +748,7 @@ export default function HomeSettingsPage() {
       const token = "cookie-auth";
 
       const response = await fetch(
-        "/api/hero-slides",
+        "/admin/api/hero-slides",
         {
           method: "PUT",
           headers: {
@@ -840,7 +840,7 @@ export default function HomeSettingsPage() {
       setSavingQuote(true);
       const token = "cookie-auth";
 
-      const response = await fetch("/api/quotes", {
+      const response = await fetch("/admin/api/quotes", {
         method: editingQuote ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
@@ -884,7 +884,7 @@ export default function HomeSettingsPage() {
       setDeletingQuoteId(quote.id);
       const token = "cookie-auth";
 
-      const response = await fetch("/api/quotes", {
+      const response = await fetch("/admin/api/quotes", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -912,7 +912,7 @@ export default function HomeSettingsPage() {
     try {
       const token = "cookie-auth";
 
-      const response = await fetch("/api/quotes", {
+      const response = await fetch("/admin/api/quotes", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

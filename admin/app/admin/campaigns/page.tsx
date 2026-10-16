@@ -156,7 +156,7 @@ export default function CampaignsPage() {
   const fetchCategories = useCallback(async () => {
     try {
       setCategoriesLoading(true);
-      const response = await fetch("/api/campaign-categories", { cache: "no-store" });
+      const response = await fetch("/admin/api/campaign-categories", { cache: "no-store" });
       const data = await response.json();
       setCategories(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -193,7 +193,7 @@ export default function CampaignsPage() {
     try {
       setSavingCategory(true);
 
-      const response = await fetch("/api/campaign-categories", {
+      const response = await fetch("/admin/api/campaign-categories", {
         method: editingCategoryId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
@@ -224,7 +224,7 @@ export default function CampaignsPage() {
     try {
       setDeletingCategoryId(category.id);
 
-      const response = await fetch("/api/campaign-categories", {
+      const response = await fetch("/admin/api/campaign-categories", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: category.id }),
@@ -259,7 +259,7 @@ export default function CampaignsPage() {
         setMessage("");
 
         const response = await fetch(
-          "/api/campaigns",
+          "/admin/api/campaigns",
           {
             method: "GET",
             cache: "no-store",
@@ -305,7 +305,7 @@ export default function CampaignsPage() {
       try {
         const headers: HeadersInit = {};
 
-        const donationsResponse = await fetch("/api/donations", {
+        const donationsResponse = await fetch("/admin/api/donations", {
           method: "GET",
           headers,
           cache: "no-store",
@@ -341,7 +341,7 @@ export default function CampaignsPage() {
             let productTitle = campaign.title;
             try {
               const productsResponse = await fetch(
-                `/api/campaign-products?campaignId=${encodeURIComponent(campaign.id)}`,
+                `/admin/api/campaign-products?campaignId=${encodeURIComponent(campaign.id)}`,
                 { cache: "no-store" }
               );
               if (productsResponse.ok) {
@@ -357,7 +357,7 @@ export default function CampaignsPage() {
             let updates = 0;
             try {
               const updatesResponse = await fetch(
-                `/api/campaign-updates?campaignId=${encodeURIComponent(campaign.id)}`,
+                `/admin/api/campaign-updates?campaignId=${encodeURIComponent(campaign.id)}`,
                 { cache: "no-store" }
               );
               if (updatesResponse.ok) {
@@ -392,7 +392,7 @@ export default function CampaignsPage() {
   useEffect(() => {
     void loadCampaigns().then(() => {
       // Load campaign-specific payment/product details after the campaign list is available.
-      fetch("/api/campaigns", { cache: "no-store" })
+      fetch("/admin/api/campaigns", { cache: "no-store" })
         .then((response) => response.json())
         .then((data) => {
           if (Array.isArray(data)) {
@@ -625,7 +625,7 @@ export default function CampaignsPage() {
 
       const response =
         await fetch(
-          "/api/campaigns",
+          "/admin/api/campaigns",
           {
             method: editingId
               ? "PUT"
@@ -669,7 +669,7 @@ export default function CampaignsPage() {
       );
 
       await loadCampaigns();
-      const refreshed = await fetch("/api/campaigns", { cache: "no-store" });
+      const refreshed = await fetch("/admin/api/campaigns", { cache: "no-store" });
       if (refreshed.ok) {
         const refreshedData = await refreshed.json();
         if (Array.isArray(refreshedData)) void loadCampaignRowData(refreshedData);
@@ -700,7 +700,7 @@ export default function CampaignsPage() {
 
       const response =
         await fetch(
-          "/api/campaigns",
+          "/admin/api/campaigns",
           {
             method: "PUT",
 
@@ -803,7 +803,7 @@ export default function CampaignsPage() {
 
       const response =
         await fetch(
-          "/api/campaigns",
+          "/admin/api/campaigns",
           {
             method: "DELETE",
 

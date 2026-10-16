@@ -81,7 +81,7 @@ export default function BlogsPage() {
     try {
       setLoading(true);
 
-      const response = await fetch("/api/blogs", {
+      const response = await fetch("/admin/api/blogs", {
         method: "GET",
         cache: "no-store",
       });
@@ -217,7 +217,7 @@ export default function BlogsPage() {
         isActive: form.isActive,
       };
 
-      const response = await fetch("/api/blogs", {
+      const response = await fetch("/admin/api/blogs", {
         method: editingId ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
@@ -270,7 +270,7 @@ export default function BlogsPage() {
 
       const token = "cookie-auth";
 
-      const response = await fetch("/api/blogs", {
+      const response = await fetch("/admin/api/blogs", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -323,7 +323,7 @@ export default function BlogsPage() {
       formData.append("file", file);
       formData.append("blogId", String(editingId));
 
-      const response = await fetch("/api/media", {
+      const response = await fetch("/admin/api/media", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -358,7 +358,7 @@ export default function BlogsPage() {
 
       const token = "cookie-auth";
 
-      const response = await fetch("/api/media", {
+      const response = await fetch("/admin/api/media", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

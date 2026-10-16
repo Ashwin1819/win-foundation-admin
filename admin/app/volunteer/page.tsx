@@ -63,7 +63,7 @@ export default function VolunteerPage() {
       setSubmitting(true);
 
       const response = await fetch(
-        "/api/volunteers",
+        "/admin/api/volunteers",
         {
           method: "POST",
           headers: {

@@ -23,7 +23,7 @@ export default function MessagesPage() {
   useEffect(() => {
     async function load() {
       try {
-        const response = await fetch("/api/messages");
+        const response = await fetch("/admin/api/messages");
 
           const text = await response.text();
 
@@ -77,7 +77,7 @@ export default function MessagesPage() {
       const token = "cookie-auth";
 
       const response = await fetch(
-        "/api/messages",
+        "/admin/api/messages",
         {
           method: "PUT",
           headers: {
@@ -149,7 +149,7 @@ export default function MessagesPage() {
       const token = "cookie-auth";
 
       const response = await fetch(
-        `/api/messages?id=${encodeURIComponent(id)}`,
+        `/admin/api/messages?id=${encodeURIComponent(id)}`,
         {
           method: "DELETE",
           headers: {
