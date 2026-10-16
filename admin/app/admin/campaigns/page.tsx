@@ -66,6 +66,7 @@ type DonationRecord = {
   paymentStatus?: string;
   campaignId?: string | null;
   campaign?: { id?: string | null } | null;
+  createdAt?: string;
 };
 
 type CampaignRowStats = {
@@ -76,6 +77,119 @@ type CampaignRowStats = {
   productTitle: string;
   updates: number;
 };
+
+type DateRangePreset =
+  | "1d"
+  | "7d"
+  | "15d"
+  | "20d"
+  | "1m"
+  | "6m"
+  | "1y"
+  | "lifetime"
+  | "custom";
+
+const DATE_RANGE_OPTIONS: { value: DateRangePreset; label: string }[] = [
+  { value: "1d", label: "Last 1 day" },
+  { value: "7d", label: "Last 7 days" },
+  { value: "15d", label: "Last 15 days" },
+  { value: "20d", label: "Last 20 days" },
+  { value: "1m", label: "Last 1 month" },
+  { value: "6m", label: "Last 6 months" },
+  { value: "1y", label: "Last 1 year" },
+  { value: "lifetime", label: "Lifetime" },
+  { value: "custom", label: "Custom range" },
+];
+
+// Resolves a preset (or custom start/end) into concrete bounds. Returns
+// { start: null, end: null } for "lifetime", meaning no date filtering at
+// all — every donation record is included, even ones with a missing or
+// unparseable date (handled separately in isWithinDateRange below).
+function getDateRangeBounds(
+  preset: DateRangePreset,
+  customStart: string,
+  customEnd: string
+): { start: Date | null; end: Date | null } {
+  if (preset === "lifetime") {
+    return { start: null, end: null };
+  }
+
+  if (preset === "custom") {
+    if (!customStart || !customEnd) {
+      // Incomplete custom range — treat as no filter yet rather than
+      // silently excluding everything while the admin is still picking dates.
+      return { start: null, end: null };
+    }
+
+    let start = new Date(`${customStart}T00:00:00`);
+    let end = new Date(`${customEnd}T23:59:59.999`);
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return { start: null, end: null };
+    }
+
+    if (start.getTime() > end.getTime()) {
+      // Swap rather than produce an empty/confusing range.
+      [start, end] = [end, start];
+    }
+
+    return { start, end };
+  }
+
+  const end = new Date();
+  const start = new Date();
+
+  switch (preset) {
+    case "1d":
+      start.setDate(start.getDate() - 1);
+      break;
+    case "7d":
+      start.setDate(start.getDate() - 7);
+      break;
+    case "15d":
+      start.setDate(start.getDate() - 15);
+      break;
+    case "20d":
+      start.setDate(start.getDate() - 20);
+      break;
+    case "1m":
+      start.setMonth(start.getMonth() - 1);
+      break;
+    case "6m":
+      start.setMonth(start.getMonth() - 6);
+      break;
+    case "1y":
+      start.setFullYear(start.getFullYear() - 1);
+      break;
+  }
+
+  return { start, end };
+}
+
+// A donation with a missing/invalid date can't be placed inside a specific
+// window, so it's excluded from dated presets — but "lifetime" (bounds of
+// null/null) always includes it, since lifetime means every available
+// record regardless of whether its date is clean.
+function isWithinDateRange(
+  createdAt: string | undefined,
+  start: Date | null,
+  end: Date | null
+): boolean {
+  if (!start || !end) {
+    return true;
+  }
+
+  if (!createdAt) {
+    return false;
+  }
+
+  const time = new Date(createdAt).getTime();
+  if (Number.isNaN(time)) {
+    return false;
+  }
+
+  return time >= start.getTime() && time <= end.getTime();
+}
 
 type SortField =
   | "menuOrder"
@@ -245,8 +359,20 @@ export default function CampaignsPage() {
     }
   }
 
-  const [rowStats, setRowStats] =
-    useState<Record<string, CampaignRowStats>>({});
+  const [enrichment, setEnrichment] =
+    useState<Record<string, { productTitle: string; updates: number }>>({});
+
+  const [donations, setDonations] =
+    useState<DonationRecord[]>([]);
+
+  const [dateRangePreset, setDateRangePreset] =
+    useState<DateRangePreset>("lifetime");
+
+  const [customStartDate, setCustomStartDate] =
+    useState("");
+
+  const [customEndDate, setCustomEndDate] =
+    useState("");
 
   const redirectToLogin = useCallback(() => {
     router.push("/admin/login");
@@ -315,29 +441,16 @@ export default function CampaignsPage() {
           ? await donationsResponse.json()
           : [];
 
-        const donations: DonationRecord[] = Array.isArray(donationsData)
+        const fetchedDonations: DonationRecord[] = Array.isArray(donationsData)
           ? donationsData
           : [];
 
-        const nextStats: Record<string, CampaignRowStats> = {};
+        setDonations(fetchedDonations);
+
+        const nextEnrichment: Record<string, { productTitle: string; updates: number }> = {};
 
         await Promise.all(
           items.map(async (campaign) => {
-            const campaignDonations = donations.filter((donation) => {
-              const id = donation.campaignId || donation.campaign?.id || null;
-              return id === campaign.id;
-            });
-
-            const successful = campaignDonations.filter(
-              (item) => String(item.paymentStatus || "").toUpperCase() === "SUCCESS"
-            );
-
-            const failed = campaignDonations.filter((item) =>
-              ["FAILED", "FAILURE", "CANCELLED", "CANCELED"].includes(
-                String(item.paymentStatus || "").toUpperCase()
-              )
-            );
-
             let productTitle = campaign.title;
             try {
               const productsResponse = await fetch(
@@ -368,26 +481,73 @@ export default function CampaignsPage() {
               // Updates are optional for the list view.
             }
 
-            nextStats[campaign.id] = {
-              collected: successful.length
-                ? successful.reduce((sum, item) => sum + Number(item.amount || 0), 0)
-                : Number(campaign.raisedAmount || 0),
-              completed: successful.length,
-              failed: failed.reduce((sum, item) => sum + Number(item.amount || 0), 0),
-              failedCount: failed.length,
-              productTitle,
-              updates,
-            };
+            nextEnrichment[campaign.id] = { productTitle, updates };
           })
         );
 
-        setRowStats(nextStats);
+        setEnrichment(nextEnrichment);
       } catch (error) {
         console.error("Campaign row data error:", error);
       }
     },
     []
   );
+
+  // Money stats (collected/completed/failed/failedCount) recomputed
+  // entirely client-side from the already-fetched `donations` + the
+  // selected date range — no network call involved in changing the filter.
+  const { start: rangeStart, end: rangeEnd } = useMemo(
+    () => getDateRangeBounds(dateRangePreset, customStartDate, customEndDate),
+    [dateRangePreset, customStartDate, customEndDate]
+  );
+
+  const moneyStats = useMemo(() => {
+    const nextStats: Record<string, { collected: number; completed: number; failed: number; failedCount: number }> = {};
+
+    for (const campaign of campaigns) {
+      const campaignDonations = donations.filter((donation) => {
+        const id = donation.campaignId || donation.campaign?.id || null;
+        if (id !== campaign.id) return false;
+        return isWithinDateRange(donation.createdAt, rangeStart, rangeEnd);
+      });
+
+      const successful = campaignDonations.filter(
+        (item) => String(item.paymentStatus || "").toUpperCase() === "SUCCESS"
+      );
+
+      const failed = campaignDonations.filter((item) =>
+        ["FAILED", "FAILURE", "CANCELLED", "CANCELED"].includes(
+          String(item.paymentStatus || "").toUpperCase()
+        )
+      );
+
+      nextStats[campaign.id] = {
+        // Lifetime (no range selected) falls back to the campaign's stored
+        // raisedAmount when there happen to be no matching SUCCESS records
+        // found among the fetched donations, same as the original behavior.
+        collected: successful.length
+          ? successful.reduce((sum, item) => sum + Number(item.amount || 0), 0)
+          : rangeStart === null
+          ? Number(campaign.raisedAmount || 0)
+          : 0,
+        completed: successful.length,
+        failed: failed.reduce((sum, item) => sum + Number(item.amount || 0), 0),
+        failedCount: failed.length,
+      };
+    }
+
+    return nextStats;
+  }, [campaigns, donations, rangeStart, rangeEnd]);
+
+  const rowStats = useMemo(() => {
+    const combined: Record<string, CampaignRowStats> = {};
+    for (const campaign of campaigns) {
+      const money = moneyStats[campaign.id] || { collected: 0, completed: 0, failed: 0, failedCount: 0 };
+      const extra = enrichment[campaign.id] || { productTitle: campaign.title, updates: 0 };
+      combined[campaign.id] = { ...money, ...extra };
+    }
+    return combined;
+  }, [campaigns, moneyStats, enrichment]);
 
   useEffect(() => {
     void loadCampaigns().then(() => {
@@ -1075,6 +1235,48 @@ export default function CampaignsPage() {
             <option value="oldest">Oldest first</option>
             <option value="newest">Newest first</option>
           </select>
+        </div>
+
+        {/* DATE RANGE FILTER — applies to Collected/Failed stats and the
+            per-campaign collected/failed figures below. Total Goal and
+            Campaigns count stay lifetime, deliberately not filtered here. */}
+        <div style={dateFilterBarStyle}>
+          <label style={dateFilterLabelStyle} htmlFor="campaign-date-range">
+            Donation period
+          </label>
+          <select
+            id="campaign-date-range"
+            value={dateRangePreset}
+            onChange={(event) => setDateRangePreset(event.target.value as DateRangePreset)}
+            style={campaignSortStyle}
+            aria-label="Filter donations by date range"
+          >
+            {DATE_RANGE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+
+          {dateRangePreset === "custom" && (
+            <div style={customRangeRowStyle}>
+              <input
+                type="date"
+                value={customStartDate}
+                onChange={(event) => setCustomStartDate(event.target.value)}
+                style={{ ...inputStyle, width: "150px" }}
+                aria-label="Custom range start date"
+              />
+              <span style={{ color: "#98a2b3", fontSize: "11px" }}>to</span>
+              <input
+                type="date"
+                value={customEndDate}
+                onChange={(event) => setCustomEndDate(event.target.value)}
+                style={{ ...inputStyle, width: "150px" }}
+                aria-label="Custom range end date"
+              />
+            </div>
+          )}
         </div>
 
         {/* CAMPAIGN TABLE */}
@@ -2206,6 +2408,32 @@ const campaignToolbarStyle: CSSProperties = {
   display: "flex",
   gap: "10px",
   marginBottom: "12px",
+};
+
+const dateFilterBarStyle: CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  gap: "10px",
+  marginBottom: "16px",
+  padding: "10px 12px",
+  background: "#ffffff",
+  border: "1px solid #e2e8f0",
+  borderRadius: "6px",
+};
+
+const dateFilterLabelStyle: CSSProperties = {
+  fontSize: "11px",
+  fontWeight: 700,
+  color: "#344054",
+  whiteSpace: "nowrap",
+};
+
+const customRangeRowStyle: CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  gap: "8px",
 };
 
 const campaignSearchStyle: CSSProperties = {
