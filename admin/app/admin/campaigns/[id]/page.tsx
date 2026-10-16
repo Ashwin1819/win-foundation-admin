@@ -8,6 +8,12 @@ import {
 } from "react";
 import { useParams, useRouter } from "next/navigation";
 
+type CostBreakdownItem = {
+  item: string;
+  qty: number;
+  pricePerUnit: number;
+};
+
 type Campaign = {
   id: number;
   title: string;
@@ -21,6 +27,7 @@ type Campaign = {
   endDate: string | null;
   isActive: boolean;
   order: number;
+  costBreakdown?: CostBreakdownItem[];
   photos?: CampaignPhotoItem[];
   videos?: CampaignVideoItem[];
 };
@@ -77,6 +84,8 @@ export default function CampaignEditPage() {
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [loadingUpdates, setLoadingUpdates] = useState(false);
   const [savingProducts, setSavingProducts] = useState(false);
+  const [costBreakdown, setCostBreakdown] = useState<CostBreakdownItem[]>([]);
+  const [savingCostBreakdown, setSavingCostBreakdown] = useState(false);
   const [savingProject, setSavingProject] = useState(false);
   const [addingUpdate, setAddingUpdate] = useState(false);
   const [uploadingProductIndex, setUploadingProductIndex] = useState<number | null>(null);
@@ -115,6 +124,7 @@ export default function CampaignEditPage() {
   const [selectedProjectFile, setSelectedProjectFile] = useState("");
   const [selectedUpdateFiles, setSelectedUpdateFiles] = useState<string[]>([]);
   const [productsExpanded, setProductsExpanded] = useState(true);
+  const [costBreakdownExpanded, setCostBreakdownExpanded] = useState(true);
   const [campaignImagePreviews, setCampaignImagePreviews] = useState<string[]>([]);
 
   const redirectToLogin = useCallback(() => {
@@ -159,6 +169,7 @@ export default function CampaignEditPage() {
       setTitle(found.title);
       setActiveCampaign(found.isActive);
       setStoryText(found.story || "");
+      setCostBreakdown(Array.isArray(found.costBreakdown) ? found.costBreakdown : []);
     } catch (error) {
       console.error("Load campaign error:", error);
       setMessage(
@@ -872,6 +883,77 @@ export default function CampaignEditPage() {
       );
     } finally {
       setSavingProducts(false);
+    }
+  }
+
+  function updateCostBreakdownRow(index: number, field: keyof CostBreakdownItem, value: string | number) {
+    setCostBreakdown((current) => {
+      const next = [...current];
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
+  }
+
+  function addCostBreakdownRow() {
+    setCostBreakdown((current) => [...current, { item: "", qty: 0, pricePerUnit: 0 }]);
+  }
+
+  function removeCostBreakdownRow(index: number) {
+    setCostBreakdown((current) => current.filter((_, i) => i !== index));
+  }
+
+  async function saveCostBreakdown() {
+    for (let index = 0; index < costBreakdown.length; index++) {
+      const row = costBreakdown[index];
+
+      if (!row.item.trim()) {
+        setMessage(`Cost breakdown row ${index + 1}: item name is required.`);
+        return;
+      }
+
+      if (Number(row.qty) <= 0) {
+        setMessage(`Cost breakdown row ${index + 1}: quantity must be greater than 0.`);
+        return;
+      }
+
+      if (Number(row.pricePerUnit) < 0) {
+        setMessage(`Cost breakdown row ${index + 1}: price cannot be negative.`);
+        return;
+      }
+    }
+
+    try {
+      setSavingCostBreakdown(true);
+      setMessage("");
+
+      const response = await fetch("/admin/api/campaigns", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: campaignId,
+          costBreakdown: costBreakdown.map((row) => ({
+            item: row.item.trim(),
+            qty: Number(row.qty),
+            pricePerUnit: Number(row.pricePerUnit),
+          })),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Failed to save cost breakdown.");
+      }
+
+      setCampaign(data);
+      setMessage("Cost breakdown saved successfully.");
+    } catch (error) {
+      console.error("Save cost breakdown error:", error);
+      setMessage(
+        error instanceof Error ? error.message : "Failed to save cost breakdown."
+      );
+    } finally {
+      setSavingCostBreakdown(false);
     }
   }
 
@@ -1648,6 +1730,105 @@ export default function CampaignEditPage() {
                 }}
               >
                 {savingProducts ? "Saving products..." : "Save products"}
+              </button>
+            </div>
+
+            {/* This is a separate field from Products above — it's what the public
+                campaign page's "Where your money goes" table renders. The two are
+                not kept in sync automatically, so both need editing if you want the
+                public cost-breakdown table to match the donation products. */}
+            <div style={productsMoneyCardStyle}>
+              <button
+                type="button"
+                onClick={() => setCostBreakdownExpanded((current) => !current)}
+                style={productsMoneyHeaderButtonStyle}
+                aria-expanded={costBreakdownExpanded}
+              >
+                <strong>Cost Breakdown (public "Where your money goes" table)</strong>
+                <span>{costBreakdownExpanded ? "⌃" : "⌄"}</span>
+              </button>
+
+              {costBreakdownExpanded && (
+                <div style={productsMoneyBodyStyle}>
+                  <div style={productsSubTextStyle}>
+                    This feeds the cost-breakdown table shown on the public campaign page —
+                    separate from the Products list above. Add items: name, required quantity, price per unit.
+                  </div>
+
+                  <div style={productRowsStyle}>
+                    {costBreakdown.map((row, index) => (
+                      <div key={index} style={referenceProductRowStyle}>
+                        <input
+                          type="text"
+                          value={row.item}
+                          onChange={(event) => updateCostBreakdownRow(index, "item", event.target.value)}
+                          placeholder="Item"
+                          style={referenceProductInputStyle}
+                        />
+
+                        <input
+                          type="number"
+                          min="1"
+                          value={row.qty || ""}
+                          onChange={(event) =>
+                            updateCostBreakdownRow(
+                              index,
+                              "qty",
+                              event.target.value === "" ? 0 : Number(event.target.value)
+                            )
+                          }
+                          placeholder="Qty"
+                          style={referenceProductInputStyle}
+                        />
+
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={row.pricePerUnit || ""}
+                          onChange={(event) =>
+                            updateCostBreakdownRow(
+                              index,
+                              "pricePerUnit",
+                              event.target.value === "" ? 0 : Number(event.target.value)
+                            )
+                          }
+                          placeholder="Price/unit"
+                          style={referenceProductInputStyle}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => removeCostBreakdownRow(index)}
+                          style={referenceRowDeleteStyle}
+                          aria-label={`Delete cost breakdown row ${index + 1}`}
+                        >
+                          🗑
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button type="button" onClick={addCostBreakdownRow} style={addRowButtonStyle}>
+                    +&nbsp; Add row
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div style={referenceSaveFooterStyle}>
+              <button
+                type="button"
+                onClick={saveCostBreakdown}
+                disabled={savingCostBreakdown}
+                style={{
+                  ...darkButtonStyle,
+                  padding: "12px 20px",
+                  fontSize: "14px",
+                  opacity: savingCostBreakdown ? 0.6 : 1,
+                }}
+              >
+                {savingCostBreakdown ? "Saving cost breakdown..." : "Save cost breakdown"}
               </button>
             </div>
           </div>
