@@ -7,6 +7,7 @@ import {
   type CSSProperties,
 } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { getSupabaseClient, CAMPAIGN_MEDIA_BUCKET } from "@/lib/supabaseClient";
 
 type CostBreakdownItem = {
   item: string;
@@ -599,33 +600,30 @@ export default function CampaignEditPage() {
     setNewUpdateImageUrl("");
   }
 
-  // Uploads each selected file through the shared upload endpoint and
-  // returns the real, server-reachable URLs — these pickers previously only
-  // ever produced a local preview (a FileReader data URL or filename), with
-  // nothing anywhere that actually sent the file bytes to the server, so a
-  // picture chosen here could never end up saved no matter what was clicked
-  // afterward.
+  // Uploads each selected file directly to Supabase Storage and returns the
+  // real, public URLs — these pickers previously only ever produced a local
+  // preview (a FileReader data URL or filename), with nothing anywhere that
+  // actually sent the file bytes to the server, so a picture chosen here
+  // could never end up saved no matter what was clicked afterward.
   async function uploadFiles(files: File[]): Promise<string[]> {
     const uploaded: string[] = [];
+    const supabase = getSupabaseClient();
 
     for (const file of files) {
-      if (!file.type.startsWith("image/")) continue;
+      if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) continue;
 
-      const formData = new FormData();
-      formData.append("file", file);
+      const path = `products/${Date.now()}-${file.name}`;
 
-      const response = await fetch("/admin/api/uploads/campaign-product", {
-        method: "POST",
-        body: formData,
-      });
+      const { data, error } = await supabase.storage
+        .from(CAMPAIGN_MEDIA_BUCKET)
+        .upload(path, file, { contentType: file.type });
 
-      const data = await response.json();
-
-      if (response.ok && data.imageUrl) {
-        uploaded.push(data.imageUrl);
-      } else {
-        throw new Error(data?.error || `Failed to upload ${file.name}.`);
+      if (error || !data) {
+        throw new Error(error?.message || `Failed to upload ${file.name}.`);
       }
+
+      const { data: pub } = supabase.storage.from(CAMPAIGN_MEDIA_BUCKET).getPublicUrl(data.path);
+      uploaded.push(pub.publicUrl);
     }
 
     return uploaded;
@@ -726,45 +724,37 @@ export default function CampaignEditPage() {
   ) {
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setMessage("Please select an image file.");
+    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+      setMessage("Please select an image or video file.");
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      setMessage("Product image must be smaller than 10MB.");
+      setMessage("Product file must be smaller than 10MB.");
       return;
     }
-
-    const token = await getToken();
-
-    if (!token) return;
 
     try {
       setUploadingProductIndex(index);
       setMessage("");
 
-      const formData = new FormData();
-      formData.append("file", file);
+      const supabase = getSupabaseClient();
+      const path = `products/${Date.now()}-${file.name}`;
 
-      const response = await fetch("/admin/api/uploads/campaign-product", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      const { data, error } = await supabase.storage
+        .from(CAMPAIGN_MEDIA_BUCKET)
+        .upload(path, file, { contentType: file.type });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.error || "Failed to upload product image.");
+      if (error || !data) {
+        throw new Error(error?.message || "Failed to upload product image.");
       }
+
+      const { data: pub } = supabase.storage.from(CAMPAIGN_MEDIA_BUCKET).getPublicUrl(data.path);
 
       setProducts((current) =>
         current.map((product, productIndex) =>
           productIndex === index
-            ? { ...product, image: data.imageUrl || null }
+            ? { ...product, image: pub.publicUrl || null }
             : product
         )
       );
@@ -1563,7 +1553,7 @@ export default function CampaignEditPage() {
                   <input
                     type="file"
                     multiple
-                    accept="image/*"
+                    accept="image/*,video/*"
                     onChange={(event) => {
                       handleFiles(event.target.files, "products");
                       event.currentTarget.value = "";
@@ -1731,7 +1721,7 @@ export default function CampaignEditPage() {
                             Choose File
                             <input
                               type="file"
-                              accept="image/jpeg,image/png,image/webp,image/gif"
+                              accept="image/jpeg,image/png,image/webp,image/gif,video/*"
                               disabled={uploadingProductIndex === index}
                               onChange={(event) => {
                                 const file = event.target.files?.[0] || null;
@@ -2123,7 +2113,7 @@ export default function CampaignEditPage() {
             <input
               type="file"
               multiple
-              accept="image/*"
+              accept="image/*,video/*"
               onChange={(event) =>
                 handleFiles(event.target.files, "updates")
               }
